@@ -1,0 +1,10 @@
+Unattended-Upgrade::Allowed-Origins {
+        "Ubuntu:$(lsb_release -sc)-security";
+        "Ubuntu:$(lsb_release -sc)-updates";
+};
+
+Unattended-Upgrade::Package-Blacklist {
+};
+
+Unattended-Upgrade::Automatic-Reboot "true";
+Unattended-Upgrade::Automatic-Reboot-Time "02:00";
