@@ -16,7 +16,7 @@ sudo cp "$SCRIPT_DIR/jail.local" /etc/fail2ban/jail.local
 
 echo "=== Restarting fail2ban ==="
 sudo systemctl restart fail2ban
-
+sleep 5
 echo "=== Checking fail2ban status ==="
 sudo fail2ban-client status sshd || echo "SSH jail not active yet – check log"
 
