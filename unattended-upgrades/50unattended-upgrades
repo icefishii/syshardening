@@ -1,10 +1,10 @@
-Unattended - Upgrade::Allowed - Origins
-{
+Unattended-Upgrade::Allowed-Origins {
         "Ubuntu:noble-security";
         "Ubuntu:noble-updates";
 };
 
-Unattended - Upgrade::Package - Blacklist{};
+Unattended-Upgrade::Package-Blacklist {
+};
 
-Unattended - Upgrade::Automatic - Reboot "true";
-Unattended - Upgrade::Automatic - Reboot - Time "02:00";
+Unattended-Upgrade::Automatic-Reboot true;
+Unattended-Upgrade::Automatic-Reboot-Time "02:00";
