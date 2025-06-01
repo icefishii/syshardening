@@ -9,15 +9,10 @@ sudo apt install -y unattended-upgrades
 echo "=== Enabling unattended-upgrades timer ==="
 sudo systemctl enable --now unattended-upgrades
 
-# Read current directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Determine distro info
-DISTRO_CODENAME=$(lsb_release -sc)
-
-echo "=== Preparing 50unattended-upgrades ==="
-# Replace placeholder with actual codename
-sed "s/\$(CODENAME)/$DISTRO_CODENAME/g" "$SCRIPT_DIR/50unattended-upgrades" | sudo tee /etc/apt/apt.conf.d/50unattended-upgrades > /dev/null
+echo "=== Copying 50unattended-upgrades (hardcoded for noble) ==="
+sudo cp "$SCRIPT_DIR/50unattended-upgrades" /etc/apt/apt.conf.d/50unattended-upgrades
 
 echo "=== Copying 20auto-upgrades ==="
 sudo cp "$SCRIPT_DIR/20auto-upgrades" /etc/apt/apt.conf.d/20auto-upgrades
