@@ -1,0 +1,16 @@
+[Unit]
+Description=Deno Todo Web Server
+After=network.target
+
+[Service]
+Type=simple
+User=denoapp
+WorkingDirectory=/opt/webserver
+ExecStart=/opt/webserver/todo-server
+Restart=on-failure
+NoNewPrivileges=true
+ProtectSystem=full
+
+[Install]
+WantedBy=multi-user.target
+

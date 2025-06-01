@@ -1,14 +1,14 @@
-#!/bin/env bash
+#!/usr/bin/bash
 
 set -euo pipefail
 
-# Variables for the filepaths
 APP_USER="denoapp"
 APP_SRC_DIR="./webserver"
 APP_DST_DIR="/opt/webserver"
 APP_BINARY="todo-server"
 DB_FILE="todos.db"
-SERVICE_FILE="/etc/systemd/system/denoapp.service"
+SERVICE_FILE_SRC="./denoapp.service"
+SERVICE_FILE_DST="/etc/systemd/system/denoapp.service"
 
 # Check that source files exist
 if [[ ! -f "$APP_SRC_DIR/$APP_BINARY" ]] || [[ ! -f "$APP_SRC_DIR/$DB_FILE" ]]; then
@@ -16,11 +16,16 @@ if [[ ! -f "$APP_SRC_DIR/$APP_BINARY" ]] || [[ ! -f "$APP_SRC_DIR/$DB_FILE" ]]; 
     exit 1
 fi
 
+if [[ ! -f "$SERVICE_FILE_SRC" ]]; then
+    echo "Error: Missing service file: $SERVICE_FILE_SRC"
+    exit 1
+fi
+
 echo "[+] Creating system user: $APP_USER"
 if ! id "$APP_USER" &>/dev/null; then
     sudo useradd --system --no-create-home --shell /usr/sbin/nologin "$APP_USER"
 else
-    echo "User $APP_USER already exists, skipping."
+    echo "    User $APP_USER already exists, skipping."
 fi
 
 echo "[+] Creating destination directory: $APP_DST_DIR"
@@ -35,28 +40,10 @@ echo "[+] Setting strict permissions"
 sudo chmod 500 "$APP_DST_DIR/$APP_BINARY"
 sudo chmod 600 "$APP_DST_DIR/$DB_FILE"
 sudo chmod 700 "$APP_DST_DIR"
-sudo chmod +x /opt  # Ensure directory traversal
+sudo chmod +x /opt  # Ensure traversal is possible
 
-echo "[+] Writing systemd service to $SERVICE_FILE"
-sudo tee "$SERVICE_FILE" > /dev/null <<EOF
-[Unit]
-Description=Deno Todo Web Server
-After=network.target
-
-[Service]
-Type=simple
-User=$APP_USER
-WorkingDirectory=$APP_DST_DIR
-ExecStart=$APP_DST_DIR/$APP_BINARY
-Restart=on-failure
-NoNewPrivileges=true
-ProtectSystem=full
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-echo "[+] Reloading systemd and enabling service"
+echo "[+] Installing systemd service"
+sudo cp "$SERVICE_FILE_SRC" "$SERVICE_FILE_DST"
 sudo systemctl daemon-reexec
 sudo systemctl daemon-reload
 sudo systemctl enable --now denoapp.service
