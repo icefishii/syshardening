@@ -1,0 +1,14 @@
+services:
+  app:
+    image: denoland/deno:alpine
+    container_name: deno_todo_app
+    working_dir: /app
+    command: run --allow-net --allow-read --allow-write main.ts
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app                  # Mount source code
+    restart: unless-stopped
+
+volumes:
+  db_data:
