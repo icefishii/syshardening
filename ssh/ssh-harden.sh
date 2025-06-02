@@ -40,3 +40,11 @@ sudo chown "$USER:$USER" "$AUTHORIZED_KEYS"
 sudo chmod 600 "$AUTHORIZED_KEYS"
 
 echo "sshd_config copied and SSH keys added for $USER."
+
+# Restart SSH service
+if sudo systemctl restart sshd; then
+    echo "SSH service restarted successfully."
+else
+    echo "Failed to restart SSH service."
+    exit 1
+fi
