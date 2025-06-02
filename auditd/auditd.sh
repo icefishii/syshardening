@@ -5,7 +5,7 @@ set -e
 
 # Define file paths relative to the script's location
 SCRIPT_DIR="$(dirname "$(realpath "$0")")"
-AUDITD_CONFIG_FILE="$SCRIPT_DIR/auditd.conf"
+AUDITD_CONFIG_FILE="$SCRIPT_DIR/auditd_config.conf"
 HARDENING_RULES_FILE="$SCRIPT_DIR/hardening.rules"
 
 echo "[*] Installing auditd..."

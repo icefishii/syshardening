@@ -35,9 +35,7 @@
 
 # Network Configuration
 -w /etc/network/interfaces -p wa -k network_config
--w /etc/netplan/ -p wa -k netplan_config # For newer Ubuntu versions using netplan
--w /etc/iptables/rules.v4 -p wa -k iptables_v4
--w /etc/iptables/rules.v6 -p wa -k iptables_v6
+-w /etc/netplan/ -p wa -k netplan_config
 -w /etc/ufw/ -p wa -k ufw_config
 
 # 2. System Call Monitoring for Specific Events
