@@ -23,7 +23,7 @@ RestrictSUIDSGID=true
 RestrictNamespaces=true
 
 MemoryMax=512M
-CPUWeight=100
+CPUWeight=50
 IOWeight=10
 TasksMax=50
 
