@@ -32,7 +32,7 @@ Include /etc/ssh/sshd_config.d/*.conf
 PermitRootLogin no
 StrictModes yes
 MaxAuthTries 3
-#MaxSessions 10
+MaxSessions 2
 
 PubkeyAuthentication yes
 
@@ -92,11 +92,11 @@ X11Forwarding no
 #PermitTTY yes
 PrintMotd no
 #PrintLastLog yes
-#TCPKeepAlive yes
+TCPKeepAlive no
 PermitUserEnvironment no
 #Compression delayed
 #ClientAliveInterval 0
-#ClientAliveCountMax 3
+ClientAliveCountMax 2
 #UseDNS no
 #PidFile /run/sshd.pid
 #MaxStartups 10:30:100
@@ -121,4 +121,7 @@ Subsystem       sftp    /usr/lib/openssh/sftp-server
 #       ForceCommand cvs server
 
 # hardening
+LogLevel VERBOSE
 DebianBanner no
+AllowUsers syshardening
+AllowGroups syshardening

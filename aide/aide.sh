@@ -6,6 +6,14 @@ echo "[*] Installing AIDE..."
 sudo apt update
 sudo apt install -y aide
 
+AIDE_CONF="/etc/aide/aide.conf"
+
+echo "[+] Backing up current aide.conf to aide.conf.bak"
+sudo cp "$AIDE_CONF" "${AIDE_CONF}.bak"
+
+echo "[+] Updating Checksums line to use sha512"
+sudo sed -i -r 's/^Checksums\s*=.*/Checksums = sha512/' "$AIDE_CONF"
+
 echo "[*] Initializing AIDE database..."
 sudo aideinit
 
