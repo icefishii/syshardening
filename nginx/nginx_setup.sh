@@ -2,11 +2,16 @@
 
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 DOMAIN="syshardening.lampart.dev"
 EMAIL="admin@$DOMAIN"
-NGINX_CONF_SRC="./nginx.conf"
-NGINX_SITE_CONF_SRC="./denoapp.nginx.conf"
+
+NGINX_CONF_SRC="$SCRIPT_DIR/nginx.conf"
 NGINX_CONF_DST="/etc/nginx/nginx.conf"
+NGINX_CONF_BACKUP="/etc/nginx/nginx.conf.bak"
+
+NGINX_SITE_CONF_SRC="$SCRIPT_DIR/denoapp.nginx.conf"
 NGINX_SITE_CONF_DST="/etc/nginx/sites-available/denoapp"
 NGINX_ENABLED_LINK="/etc/nginx/sites-enabled/denoapp"
 
@@ -26,10 +31,13 @@ sudo certbot certonly \
   -m "$EMAIL" \
   -d "$DOMAIN"
 
-echo "[+] Copying hardened global NGINX config..."
+echo "[+] Backing up original NGINX config..."
+sudo cp "$NGINX_CONF_DST" "$NGINX_CONF_BACKUP"
+
+echo "[+] Replacing global NGINX config with hardened version..."
 sudo cp "$NGINX_CONF_SRC" "$NGINX_CONF_DST"
 
-echo "[+] Deploying application site config..."
+echo "[+] Deploying site config for application..."
 sudo cp "$NGINX_SITE_CONF_SRC" "$NGINX_SITE_CONF_DST"
 sudo ln -sf "$NGINX_SITE_CONF_DST" "$NGINX_ENABLED_LINK"
 
@@ -40,4 +48,4 @@ sudo systemctl start nginx
 echo "[+] Verifying certbot renewal setup..."
 sudo certbot renew --dry-run --preferred-challenges tls-alpn-01
 
-echo "[✔] All done. Your site is live at https://$DOMAIN"
+echo "[✔] NGINX hardened and site live at https://$DOMAIN"
