@@ -41,6 +41,12 @@ sudo cp /etc/rkhunter.conf /etc/rkhunter.conf.bak.$(date +%Y%m%d%H%M%S)
 echo "[+] Replacing /etc/rkhunter.conf with custom config from $NEW_RKHUNTER_CONF"
 sudo cp "$NEW_RKHUNTER_CONF" /etc/rkhunter.conf
 
+# Remove existing MIRRORS_LOCATION lines
+sudo sed -i '/^MIRRORS_LOCATION/d' "$CONF"
+
+# Add MIRRORS_LOCATION with HTTPS URLs at the end of the file
+echo "MIRRORS_LOCATION=mirror1=https://rkhunter.sourceforge.net/1.4/mirrors.dat" | sudo tee -a "$CONF" >/dev/null
+
 echo "[+] Done replacing rkhunter config"
 
 echo "[+] Updating rkhunter data files"
