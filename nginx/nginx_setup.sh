@@ -17,14 +17,13 @@ NGINX_ENABLED_LINK="/etc/nginx/sites-enabled/denoapp"
 
 echo "[+] Installing NGINX and Certbot with TLS-ALPN support..."
 sudo apt update
-sudo apt install -y nginx certbot
+sudo apt install -y nginx certbot python3-certbot-nginx
 
 echo "[+] Stopping NGINX temporarily for TLS-ALPN-01 challenge..."
 sudo systemctl stop nginx
 
 echo "[+] Requesting certificate using TLS-ALPN-01..."
 sudo certbot certonly \
-  --standalone \
   --nginx \
   --non-interactive \
   --agree-tos \
