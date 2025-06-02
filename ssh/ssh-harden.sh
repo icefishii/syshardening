@@ -1,8 +1,11 @@
 #!/usr/bin/bash
 set -e
 
+# Determine the directory of the script
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 # Variables
-SSHD_CONFIG_SRC="./sshd_config"
+SSHD_CONFIG_SRC="$SCRIPT_DIR/sshd_config"
 SSHD_CONFIG_DEST="/etc/ssh/sshd_config"
 USER="syshardening"
 AUTHORIZED_KEYS="/home/$USER/.ssh/authorized_keys"
@@ -13,7 +16,7 @@ if [ -f "$SSHD_CONFIG_SRC" ]; then
     sudo chmod 600 "$SSHD_CONFIG_DEST"
     sudo chown root:root "$SSHD_CONFIG_DEST"
 else
-    echo "sshd_config not found in current directory."
+    echo "sshd_config not found in $SCRIPT_DIR."
     exit 1
 fi
 
