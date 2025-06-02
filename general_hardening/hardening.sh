@@ -41,9 +41,6 @@ LOG_DIR="/var/log/chkrootkit"
 mkdir -p "$LOG_DIR"
 LOG_FILE="$LOG_DIR/chkrootkit_$(date +%F_%H-%M-%S).log"
 
-echo "[+] Running chkrootkit scan..."
-chkrootkit | tee "$LOG_FILE"
-
 # Prepare cron job
 CRON_CMD="/usr/sbin/chkrootkit >> $LOG_DIR/cron.log 2>&1"
 CRON_JOB="0 3 * * * $CRON_CMD"
