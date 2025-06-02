@@ -30,4 +30,7 @@ if [[ $? -eq 0 ]]; then
     echo "User 'syshardening' created successfully and added to the sudo group."
 else
     echo "Failed to add 'syshardening' to the sudo group. Please check for errors."
+    exit 1
 fi
+
+sudo passwd -l root
