@@ -10,7 +10,7 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 # Create the user with a home directory and 'pash' as its shell
-useradd -m -s /bin/pash syshardening
+useradd -m -s /bin/bash syshardening
 
 # Check if the user was created successfully
 if [[ $? -ne 0 ]]; then
