@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -euo pipefail
+set -xeuo pipefail
 
 # Ensure script runs as root
 if [ "$EUID" -ne 0 ]; then
@@ -47,9 +47,7 @@ CRON_CMD="/usr/sbin/chkrootkit >> $LOG_DIR/cron.log 2>&1"
 CRON_JOB="0 3 * * * $CRON_CMD"
 
 # Check if the cron job already exists
-(crontab -l 2>/dev/null | grep -F "$CRON_CMD") >/dev/null
-
-if [ $? -eq 0 ]; then
+if crontab -l 2>/dev/null | grep -F "$CRON_CMD" >/dev/null; then
   echo "[+] Cron job already exists. Skipping addition."
 else
   echo "[+] Adding daily cron job (every day at 3 AM)..."
