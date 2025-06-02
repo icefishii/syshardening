@@ -18,11 +18,14 @@ sudo ufw default deny incoming
 sudo ufw default deny outgoing
 
 echo "Allowing outgoing DNS (for domain name resolution)..."
-sudo ufw allow out 53
+sudo ufw allow out 53/udp
 
 echo "Allowing outgoing HTTP (port 80) and HTTPS (port 443)..."
 sudo ufw allow out 80
 sudo ufw allow out 443
+
+echo "Allowing outgoing NTP (port 123)..."
+sudo ufw allow out ntp
 
 echo "Allowing incoming SSH (port 22)..."
 sudo ufw allow 22/tcp

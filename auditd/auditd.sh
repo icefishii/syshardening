@@ -3,6 +3,11 @@
 # Exit immediately if a command exits with a non-zero status.
 set -e
 
+# Define file paths relative to the script's location
+SCRIPT_DIR="$(dirname "$(realpath "$0")")"
+AUDITD_CONFIG_FILE="$SCRIPT_DIR/auditd.conf"
+HARDENING_RULES_FILE="$SCRIPT_DIR/hardening.rules"
+
 echo "[*] Installing auditd..."
 sudo apt update
 sudo apt install -y auditd audispd-plugins
@@ -11,32 +16,31 @@ echo "[*] Enabling and starting auditd service..."
 sudo systemctl enable auditd
 sudo systemctl start auditd
 
-echo "[*] Setting max log file size and number of rotated logs..."
-sudo sed -i 's/^max_log_file = .*/max_log_file = 50/' /etc/audit/auditd.conf
-sudo sed -i 's/^num_logs = .*/num_logs = 5/' /etc/audit/auditd.conf
-sudo sed -i 's/^space_left_action = .*/space_left_action = email/' /etc/audit/auditd.conf
-sudo sed -i 's/^action_mail_acct = .*/action_mail_acct = root/' /etc/audit/auditd.conf
+echo "[*] Applying auditd.conf settings from $AUDITD_CONFIG_FILE..."
+if [ -f "$AUDITD_CONFIG_FILE" ]; then
+    # Clear existing common settings in auditd.conf to avoid duplicates
+    sudo sed -i '/^max_log_file =/d' /etc/audit/auditd.conf
+    sudo sed -i '/^num_logs =/d' /etc/audit/auditd.conf
+    sudo sed -i '/^space_left_action =/d' /etc/audit/auditd.conf
+    sudo sed -i '/^action_mail_acct =/d' /etc/audit/auditd.conf
+    
+    # Append the settings from the external file
+    sudo cat "$AUDITD_CONFIG_FILE" >> /etc/audit/auditd.conf
+    echo "    Settings applied."
+else
+    echo "    Warning: $AUDITD_CONFIG_FILE not found. Skipping auditd.conf configuration."
+fi
 
-echo "[*] Adding basic audit rules..."
-cat << 'EOF' | sudo tee /etc/audit/rules.d/hardening.rules > /dev/null
-# Monitor /etc/passwd and /etc/shadow for changes
--w /etc/passwd -p wa -k passwd_changes
--w /etc/shadow -p wa -k shadow_changes
 
-# Monitor user/group changes
--w /etc/group -p wa -k group_changes
--w /etc/gshadow -p wa -k gshadow_changes
-
-# Monitor sudo commands
--w /var/log/sudo.log -p rwxa -k sudo_log
-
-# Monitor nginx configuration changes
--w /etc/nginx/ -p wa -k nginx_conf
-
-# Monitor execution of binaries in /bin and /usr/bin
--w /bin/ -p x -k bin_exec
--w /usr/bin/ -p x -k usrbin_exec
-EOF
+echo "[*] Adding audit rules from $HARDENING_RULES_FILE..."
+if [ -f "$HARDENING_RULES_FILE" ]; then
+    # Clear existing rules in hardening.rules before adding new ones
+    sudo cp "$HARDENING_RULES_FILE" /etc/audit/rules.d/hardening.rules
+    echo "    Rules copied."
+else
+    echo "    Error: $HARDENING_RULES_FILE not found. Cannot apply audit rules."
+    exit 1
+fi
 
 echo "[*] Setting correct permissions for audit rules..."
 sudo chmod 640 /etc/audit/rules.d/hardening.rules

@@ -29,7 +29,7 @@ LOGFILE="/var/log/aide/aide-check.log"
 mkdir -p "$(dirname "$LOGFILE")"
 
 echo "[*] Running AIDE integrity check on $(date)" >> "$LOGFILE"
-/usr/bin/aide.wrapper --check >> "$LOGFILE"
+aide --check --config /etc/aide/aide.conf >> "$LOGFILE"
 EOF
 
 sudo chmod +x /etc/cron.daily/aide-check
