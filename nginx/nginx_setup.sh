@@ -45,7 +45,7 @@ echo "[+] Testing and restarting NGINX with new configuration..."
 sudo nginx -t
 sudo systemctl start nginx
 
-echo "[+] Verifying certbot renewal setup..."
-sudo certbot renew --dry-run --preferred-challenges tls-alpn-01
+#echo "[+] Verifying certbot renewal setup..."
+#sudo certbot renew --dry-run --preferred-challenges tls-alpn-01
 
 echo "[✔] NGINX hardened and site live at https://$DOMAIN"
