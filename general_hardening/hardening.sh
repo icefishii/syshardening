@@ -34,8 +34,9 @@ BANNER_TEXT="Authorized access only. Unauthorized use is prohibited and will be 
 echo "$BANNER_TEXT" | sudo tee /etc/issue /etc/issue.net > /dev/null
 
 echo "[+] Installing chkrootkit..."
-apt update && apt install -y chkrootkit
+apt install -y chkrootkit
 
+echo "[+] Logs..."
 # Set log path
 LOG_DIR="/var/log/chkrootkit"
 mkdir -p "$LOG_DIR"
