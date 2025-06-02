@@ -41,6 +41,8 @@ sudo cp /etc/rkhunter.conf /etc/rkhunter.conf.bak.$(date +%Y%m%d%H%M%S)
 echo "[+] Replacing /etc/rkhunter.conf with custom config from $NEW_RKHUNTER_CONF"
 sudo cp "$NEW_RKHUNTER_CONF" /etc/rkhunter.conf
 
+CONF="/etc/rkhunter.conf"
+
 # Remove existing MIRRORS_LOCATION lines
 sudo sed -i '/^MIRRORS_LOCATION/d' "$CONF"
 
