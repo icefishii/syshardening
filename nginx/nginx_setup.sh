@@ -25,7 +25,7 @@ sudo systemctl stop nginx
 echo "[+] Requesting certificate using TLS-ALPN-01..."
 sudo certbot certonly \
   --standalone \
-  --preferred-challenges tls-alpn-01 \
+  --nginx \
   --non-interactive \
   --agree-tos \
   -m "$EMAIL" \
