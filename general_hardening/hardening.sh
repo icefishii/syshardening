@@ -120,3 +120,51 @@ sudo systemctl restart sysstat
 sudo systemctl status sysstat --no-pager
 
 echo "[✓] Process accounting and sysstat are now active."
+
+echo "[+] Configuring default umask to 027..."
+
+LOGIN_DEFS_FILE="/etc/login.defs"
+PROFILE_FILE="/etc/profile"
+UMASK_VALUE="027"
+
+
+echo "    - Backing up $LOGIN_DEFS_FILE to $LOGIN_DEFS_FILE.bak"
+sudo cp "$LOGIN_DEFS_FILE" "$LOGIN_DEFS_FILE.bak" || { echo "Error backing up $LOGIN_DEFS_FILE"; exit 1; }
+echo "    - Backing up $PROFILE_FILE to $PROFILE_FILE.bak"
+sudo cp "$PROFILE_FILE" "$PROFILE_FILE.bak" || { echo "Error backing up $PROFILE_FILE"; exit 1; }
+
+if grep -qE "^\s*UMASK\s+" "$LOGIN_DEFS_FILE"; then
+    echo "    - Updating UMASK in $LOGIN_DEFS_FILE"
+    sudo sed -i -E "s/^\s*#?\s*UMASK\s+[0-9]{3,4}/UMASK\t$UMASK_VALUE/" "$LOGIN_DEFS_FILE"
+else
+    echo "    - Adding UMASK to $LOGIN_DEFS_FILE"
+    echo -e "\n# Set default umask for new user accounts and system processes\nUMASK\t$UMASK_VALUE" | sudo tee -a "$LOGIN_DEFS_FILE" > /dev/null
+fi
+
+if grep -qE "^\s*umask\s+[0-9]{3,4}" "$PROFILE_FILE"; then
+    echo "    - Updating umask in $PROFILE_FILE"
+    sudo sed -i -E "s/^\s*umask\s+[0-9]{3,4}/umask $UMASK_VALUE/" "$PROFILE_FILE"
+else
+    echo "    - Adding umask to $PROFILE_FILE"
+    echo -e "\n# Set default umask for interactive login shells\numask $UMASK_VALUE" | sudo tee -a "$PROFILE_FILE" > /dev/null
+fi
+
+echo "    [+] umask configuration complete. New sessions will pick up changes."
+
+echo "[+] Configuring session timeout (TMOUT) to 300 seconds in /etc/profile..."
+
+TMOUT_VALUE="300" # 5 minutes
+
+if grep -qE "^\s*TMOUT=" "$PROFILE_FILE"; then
+    echo "    - Updating TMOUT in $PROFILE_FILE"
+    sudo sed -i -E "s/^\s*TMOUT=[0-9]*/TMOUT=$TMOUT_VALUE/" "$PROFILE_FILE"
+else
+    echo "    - Adding TMOUT to $PROFILE_FILE"
+    echo -e "\n# Set session timeout (in seconds) for interactive shells\nexport TMOUT=$TMOUT_VALUE\nreadonly TMOUT" | sudo tee -a "$PROFILE_FILE" > /dev/null
+fi
+
+echo "    [+] Session timeout configuration complete. New sessions will pick up changes."
+
+echo "[✔] Hardening script finished successfully."
+echo "IMPORTANT: For 'umask' and 'TMOUT' changes to take effect, users must log out and back in."
+echo "           For 'umask' in /etc/login.defs, changes affect *newly created users*."
