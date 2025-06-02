@@ -30,6 +30,19 @@ echo "$BANNER_TEXT" | sudo tee /etc/issue /etc/issue.net > /dev/null
 echo "[+] Installing rkhunter"
 sudo apt install -y rkhunter
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Path to your custom rkhunter.conf file in the script folder
+NEW_RKHUNTER_CONF="$SCRIPT_DIR/rkhunter.conf"
+
+# Backup current config before replacing
+sudo cp /etc/rkhunter.conf /etc/rkhunter.conf.bak.$(date +%Y%m%d%H%M%S)
+
+echo "[+] Replacing /etc/rkhunter.conf with custom config from $NEW_RKHUNTER_CONF"
+sudo cp "$NEW_RKHUNTER_CONF" /etc/rkhunter.conf
+
+echo "[+] Done replacing rkhunter config"
+
 echo "[+] Updating rkhunter data files"
 sudo rkhunter --update
 
@@ -74,4 +87,12 @@ PAM_FILE="/etc/pam.d/common-password"
 
 if ! grep -q "pam_pwquality.so" "$PAM_FILE"; then
   echo "password requisite pam_pwquality.so retry=3" | sudo tee -a "$PAM_FILE"
+fi
+
+echo "[+] Disabling core dumps in /etc/security/limits.conf"
+if ! grep -q "^\\s+hard\s+core\s+0" /etc/security/limits.conf; then
+  echo " hard core 0" | sudo tee -a /etc/security/limits.conf
+fi
+if ! grep -q "^\\s+soft\s+core\s+0" /etc/security/limits.conf; then
+  echo " soft core 0" | sudo tee -a /etc/security/limits.conf
 fi
