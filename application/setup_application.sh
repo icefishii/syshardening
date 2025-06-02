@@ -2,12 +2,17 @@
 
 set -euo pipefail
 
+# Get the directory where the script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 APP_USER="denoapp"
-APP_SRC_DIR="./webserver"
+# Use SCRIPT_DIR to define the source directory relative to the script
+APP_SRC_DIR="$SCRIPT_DIR/webserver"
 APP_DST_DIR="/opt/webserver"
 APP_BINARY="todo-server"
 DB_FILE="todos.db"
-SERVICE_FILE_SRC="./denoapp.service"
+# Use SCRIPT_DIR to define the service file source relative to the script
+SERVICE_FILE_SRC="$SCRIPT_DIR/denoapp.service"
 SERVICE_FILE_DST="/etc/systemd/system/denoapp.service"
 
 # Check that source files exist
@@ -40,7 +45,9 @@ echo "[+] Setting strict permissions"
 sudo chmod 500 "$APP_DST_DIR/$APP_BINARY"
 sudo chmod 600 "$APP_DST_DIR/$DB_FILE"
 sudo chmod 700 "$APP_DST_DIR"
-sudo chmod +x /opt  # Ensure traversal is possible
+# This might be too broad or unnecessary depending on your system's default /opt permissions.
+# Often /opt itself is already traversable. Only add if strictly needed and understood.
+# sudo chmod +x /opt
 
 echo "[+] Installing systemd service"
 sudo cp "$SERVICE_FILE_SRC" "$SERVICE_FILE_DST"
