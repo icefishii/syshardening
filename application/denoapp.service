@@ -7,67 +7,25 @@ Type=simple
 User=denoapp
 Group=denoapp
 WorkingDirectory=/opt/webserver
-
-# ExecStart should point directly to the executable
-# Ensure the executable is NOT writable by denoapp
 ExecStart=/opt/webserver/todo-server
-
 Restart=on-failure
 
-# === Recommended Security Hardening Directives ===
+NoNewPrivileges=true
+ProtectSystem=full
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+RestrictNamespaces=true
 
-# 1. Process Isolation (already good, but can be enhanced)
-NoNewPrivileges=true      
-# Prevents the process from gaining new privileges (setuid/setgid)
-ProtectSystem=strict      
-# Make /usr, /boot, /etc read-only. 'full' is also good, 'strict' is even stronger.
-ProtectHome=true          
-# Prevents access to /home, /root, /run/user. Essential for a service user.
-PrivateTmp=true           
-# Gives the service its own /tmp and /var/tmp directories, isolated from others.
-PrivateDevices=true       
-# Creates an empty /dev for the service, preventing access to host devices.
-ProtectKernelTunables=true 
-# Prevents changes to kernel tunables via /proc/sys, /sys.
-ProtectKernelModules=true 
-# Prevents loading/unloading kernel modules.
-ProtectKernelLogs=true    
-# Prevents reading/writing kernel log buffers.
-MemoryDenyWriteExecute=true 
-# Prevents the process from creating executable memory mappings that are also writable.
-RestrictRealtime=true     
-# Prevents the process from acquiring realtime scheduling.
-RestrictSUIDSGID=true     
-# Prevents creation of setuid/setgid files.
-RestrictNamespaces=true   
-# Prevents creation of new namespaces, limiting potential for container escape.
-# Option A: Keep DB in /opt/webserver but restrict access
-# This is less ideal as it mixes application code with data.
-# Ensure /opt/webserver is read-only for 'denoapp' except for the DB file.
-# Grant write access ONLY to the database file:
-ReadWritePaths=/opt/webserver/todos.db
-
-# 3. Network Access Control
-# Deno will be listening on port 8000. Nginx proxies to it.
-# To ensure the Deno app only listens locally:
-# For `denoapp` user to only listen on localhost:
-IPAddressAllow=127.0.0.1
-IPAddressDeny=any
-# This requires your Deno application to explicitly bind to 127.0.0.1:8000
-# Example in Deno: Deno.serve({ port: 8000, hostname: "127.0.0.1" }, ...)
-
-# 4. Resource Control (Optional but good for stability and DoS prevention)
-# These prevent the service from consuming too many resources.
-LimitCPU=10%                 
-# Limit CPU usage (e.g., 50% or 100%)
-LimitMEMories=512M           
-# Limit memory usage (e.g., 256MB)
-IOWeight=10                 
-# IO priority (10-1000)
-CPUWeight=100               
-# CPU scheduling priority (1-1000)
-TasksMax=50                 
-# Maximum number of tasks (processes/threads)
+MemoryMax=512M
+CPUWeight=100
+IOWeight=10
+TasksMax=50
 
 [Install]
 WantedBy=multi-user.target
