@@ -36,27 +36,6 @@ echo "$BANNER_TEXT" | sudo tee /etc/issue /etc/issue.net > /dev/null
 echo "[+] Installing chkrootkit..."
 apt install -y chkrootkit
 
-echo "[+] Logs..."
-# Set log path
-LOG_DIR="/var/log/chkrootkit"
-mkdir -p "$LOG_DIR"
-LOG_FILE="$LOG_DIR/chkrootkit_$(date +%F_%H-%M-%S).log"
-
-# Prepare cron job
-CRON_CMD="/usr/sbin/chkrootkit >> $LOG_DIR/cron.log 2>&1"
-CRON_JOB="0 3 * * * $CRON_CMD"
-
-# Check if the cron job already exists
-if crontab -l 2>/dev/null | grep -F "$CRON_CMD" >/dev/null; then
-  echo "[+] Cron job already exists. Skipping addition."
-else
-  echo "[+] Adding daily cron job (every day at 3 AM)..."
-  (crontab -l 2>/dev/null; echo "$CRON_JOB") | crontab -
-  echo "[+] Cron job added."
-fi
-
-echo "[+] Setup complete. Logs are in $LOG_DIR"
-
 echo "[+] Blacklisting unused protocols (dccp, sctp, rds, tipc)"
 cat <<EOF | sudo tee /etc/modprobe.d/disable-unused-protocols.conf >/dev/null
 blacklist dccp
