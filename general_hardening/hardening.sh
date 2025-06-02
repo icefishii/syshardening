@@ -99,3 +99,25 @@ fi
 if ! grep -q "^\\s+soft\s+core\s+0" /etc/security/limits.conf; then
   echo " soft core 0" | sudo tee -a /etc/security/limits.conf
 fi
+
+echo "[+] Installing and enabling process accounting (acct)..."
+sudo apt update
+sudo apt install -y acct
+
+echo "[+] Enabling and starting acct service..."
+sudo systemctl enable acct
+sudo systemctl start acct
+sudo systemctl status acct --no-pager
+
+echo "[+] Installing sysstat..."
+sudo apt install -y sysstat
+
+echo "[+] Enabling sysstat data collection..."
+sudo sed -i 's/^ENABLED="false"/ENABLED="true"/' /etc/default/sysstat
+
+echo "[+] Enabling and restarting sysstat service..."
+sudo systemctl enable sysstat
+sudo systemctl restart sysstat
+sudo systemctl status sysstat --no-pager
+
+echo "[✓] Process accounting and sysstat are now active."
