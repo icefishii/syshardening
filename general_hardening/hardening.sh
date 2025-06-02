@@ -2,6 +2,12 @@
 
 set -euo pipefail
 
+# Ensure script runs as root
+if [ "$EUID" -ne 0 ]; then
+  echo "Please run as root (e.g., sudo ./run_chkrootkit_daily.sh)"
+  exit 1
+fi
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 echo "[+] Installing libpam-tmpdir apt-show-versions"
@@ -27,44 +33,33 @@ echo "[+] Setting hardened login banners"
 BANNER_TEXT="Authorized access only. Unauthorized use is prohibited and will be prosecuted."
 echo "$BANNER_TEXT" | sudo tee /etc/issue /etc/issue.net > /dev/null
 
-echo "[+] Installing rkhunter"
-sudo apt install -y rkhunter
+echo "[+] Installing chkrootkit..."
+apt update && apt install -y chkrootkit
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Set log path
+LOG_DIR="/var/log/chkrootkit"
+mkdir -p "$LOG_DIR"
+LOG_FILE="$LOG_DIR/chkrootkit_$(date +%F_%H-%M-%S).log"
 
-# Path to your custom rkhunter.conf file in the script folder
-NEW_RKHUNTER_CONF="$SCRIPT_DIR/rkhunter.conf"
+echo "[+] Running chkrootkit scan..."
+chkrootkit | tee "$LOG_FILE"
 
-# Backup current config before replacing
-sudo cp /etc/rkhunter.conf /etc/rkhunter.conf.bak.$(date +%Y%m%d%H%M%S)
+# Prepare cron job
+CRON_CMD="/usr/sbin/chkrootkit >> $LOG_DIR/cron.log 2>&1"
+CRON_JOB="0 3 * * * $CRON_CMD"
 
-echo "[+] Replacing /etc/rkhunter.conf with custom config from $NEW_RKHUNTER_CONF"
-sudo cp "$NEW_RKHUNTER_CONF" /etc/rkhunter.conf
+# Check if the cron job already exists
+(crontab -l 2>/dev/null | grep -F "$CRON_CMD") >/dev/null
 
-CONF="/etc/rkhunter.conf"
+if [ $? -eq 0 ]; then
+  echo "[+] Cron job already exists. Skipping addition."
+else
+  echo "[+] Adding daily cron job (every day at 3 AM)..."
+  (crontab -l 2>/dev/null; echo "$CRON_JOB") | crontab -
+  echo "[+] Cron job added."
+fi
 
-# Remove existing MIRRORS_LOCATION lines
-sudo sed -i '/^MIRRORS_LOCATION/d' "$CONF"
-
-# Add MIRRORS_LOCATION with HTTPS URLs at the end of the file
-echo "MIRRORS_LOCATION=mirror1=https://rkhunter.sourceforge.net/1.4/mirrors.dat" | sudo tee -a "$CONF" >/dev/null
-
-echo "[+] Done replacing rkhunter config"
-
-echo "[+] Updating rkhunter data files"
-sudo rkhunter --update
-
-echo "[+] Running initial rkhunter check"
-sudo rkhunter --check --sk
-
-echo "[+] Setting up daily rkhunter cron job"
-
-sudo tee /etc/cron.daily/rkhunter-check > /dev/null << 'EOF'
-#!/usr/bin/env bash
-/usr/bin/rkhunter --check --quiet --skip-keypress | mail -s "rkhunter daily check report" root
-EOF
-
-sudo chmod +x /etc/cron.daily/rkhunter-check
+echo "[+] Setup complete. Logs are in $LOG_DIR"
 
 echo "[+] Blacklisting unused protocols (dccp, sctp, rds, tipc)"
 cat <<EOF | sudo tee /etc/modprobe.d/disable-unused-protocols.conf >/dev/null
