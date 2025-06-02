@@ -28,10 +28,10 @@ Include /etc/ssh/sshd_config.d/*.conf
 
 # Authentication:
 
-#LoginGraceTime 2m
 PermitRootLogin no
-StrictModes yes
 MaxAuthTries 3
+LoginGraceTime 30
+StrictModes yes
 MaxSessions 2
 
 PubkeyAuthentication yes
@@ -54,10 +54,11 @@ PubkeyAuthentication yes
 
 # To disable tunneled clear text passwords, change to no here!
 PasswordAuthentication no
-#PermitEmptyPasswords no
+PermitEmptyPasswords no
 
 # Change to yes to enable challenge-response passwords (beware issues with
 # some PAM modules and threads)
+ChallengeResponseAuthentication no
 KbdInteractiveAuthentication no
 
 # Kerberos options
